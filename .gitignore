@@ -1,0 +1,56 @@
+# ====================================================================
+# RescueVision Git Ignore Configuration
+# ====================================================================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Large Deep Learning Model Weights (>100MB exceeds standard GitHub push limits)
+# Download rescuevision_model.keras via Google Colab or Git LFS
+*.keras
+*.h5
+*.weights.h5
+*.tflite
+models/
+
+# Generated runtime outputs & diagnostic cards
+*.png
+*.jpg
+*.jpeg
+!dataset/**
+prediction_output.png
+demo_assessment.png
+assessment_*.png
+test_*.png
+rescue_triage_manifest.csv
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+build/
+dist/
+*.egg-info/
+
+# Logs and databases
+*.log
+*.sqlite
+*.sqlite3
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE & Editor Settings
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
