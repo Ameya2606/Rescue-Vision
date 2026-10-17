@@ -136,11 +136,38 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
+MODEL_WEIGHTS_URL = "https://github.com/Ameya2606/Rescue-Vision/releases/download/v1.0.0/rescuevision_model.keras"
+
+
+def ensure_model_weights():
+    """Auto-download weights from GitHub v1.0.0 Release if running in cloud environment."""
+    target_path = ROOT_DIR / "rescuevision_model.keras"
+    if target_path.exists() and target_path.stat().st_size > 10_000_000:
+        return True
+
+    try:
+        import urllib.request
+        with st.spinner("📦 Downloading ResNet50 model weights (~165 MB from GitHub Release)..."):
+            urllib.request.urlretrieve(MODEL_WEIGHTS_URL, str(target_path))
+        return target_path.exists() and target_path.stat().st_size > 10_000_000
+    except Exception as e:
+        print(f"Warning: Could not auto-download model weights: {e}")
+        return False
+
+
 @st.cache_resource
 def load_cached_model():
     """Cache model loading so it's loaded only once."""
-    has_weights = (ROOT_DIR / "rescuevision_model.keras").exists()
-    return RescueVisionModel(mock_mode=not has_weights)
+    target_path = ROOT_DIR / "rescuevision_model.keras"
+    if not target_path.exists() or target_path.stat().st_size < 10_000_000:
+        ensure_model_weights()
+
+    has_weights = target_path.exists() and target_path.stat().st_size > 10_000_000
+    try:
+        return RescueVisionModel(mock_mode=not has_weights)
+    except Exception as e:
+        print(f"Fallback to simulation mode: {e}")
+        return RescueVisionModel(mock_mode=True)
 
 
 # Sidebar Configuration
@@ -154,19 +181,14 @@ with st.sidebar:
     st.subheader("⚙️ System Status")
     model = load_cached_model()
     
-    if (ROOT_DIR / "rescuevision_model.keras").exists():
+    if not model.mock_mode:
         st.success("✅ Real Model Active (ResNet50 Weights Loaded)")
     else:
-        st.warning("⚠️ Simulation Mode (Awaiting Colab `.keras` file)")
-        with st.expander("📥 How to load real weights"):
+        st.warning("⚠️ Simulation Mode (Awaiting TensorFlow / Model Weights)")
+        with st.expander("📥 How to activate Real Model on Cloud"):
             st.markdown("""
-            1. In Colab, run:
-            ```python
-            from google.colab import files
-            files.download('rescuevision_model.keras')
-            ```
-            2. Place `rescuevision_model.keras` into the project root directory.
-            3. Restart this web app!
+            1. In Streamlit Cloud **Manage app → Settings**, set **Python version to 3.11**.
+            2. The model weights are automatically pulled from your [v1.0.0 Release](https://github.com/Ameya2606/Rescue-Vision/releases/tag/v1.0.0).
             """)
 
     st.markdown("---")

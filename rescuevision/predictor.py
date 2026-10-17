@@ -72,7 +72,12 @@ class RescueVisionModel:
             )
 
         self.model_path = resolved_path
-        self._load_model()
+        try:
+            self._load_model()
+        except Exception as e:
+            print(f"⚠️ [RescueVision] Failed to load model weights: {e}")
+            print("⚠️ [RescueVision] Falling back to MOCK MODE.")
+            self.mock_mode = True
 
     def _resolve_model_path(self, model_path: Optional[Union[str, Path]]) -> Optional[Path]:
         """Locate the .keras model file."""
